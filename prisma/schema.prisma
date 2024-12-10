@@ -1,0 +1,325 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  name            String
+  email           String    @unique
+  emailVerified   DateTime?
+  image           String?
+  password        String
+  birthday        DateTime
+  gender          userGender
+  school          userSchool
+  id_no           String    @unique
+  role            userRole
+  isEmailVerified Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  Account         Account[]
+  testCreated     Test[]
+  testResults     TestResult[]
+  classes         Class[]
+  joined          Joined[]
+}
+
+model Test {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  creatorId   Int
+  creator     User      @relation(fields: [creatorId], references: [id])
+  position    Int
+  questions   Question[]
+  testResults TestResult[]
+  progress    Progress[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  isPublished Boolean   @default(false)
+}
+
+model Question {
+  id                  String   @id @default(uuid())
+  testId              String
+  test                Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  question            String
+  options             Option[]
+  answer              Answer[]
+  correctAnswer       String
+  creatorId           Int
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Option {
+  id        String  @id @default(uuid())
+  text      String  
+  questionId String
+  question  Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TestResult {
+  id        String   @id @default(uuid())
+  testId    String
+  test      Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  studentId Int      
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  score     Int      
+  answers   Answer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Answer {
+  id           String   @id @default(uuid())
+  selectedOptionId String
+  isCorrect    Boolean
+  questionId   String
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  testResultId String
+  testResult   TestResult @relation(fields: [testResultId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+
+enum userRole {
+  student
+  teacher
+  admin
+}
+
+enum userGender {
+  Male
+  Female
+}
+
+enum userSchool {
+  SNHS
+  BNHS
+  MNCHS
+  BSNHS
+  PBNHS
+  DEPED
+}
+
+model Account {
+  id                Int     @id @default(autoincrement())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Course {
+  id           String  @id @default(uuid())
+  instructorId String
+  title        String  @db.Text
+  subtitle     String? @db.Text
+  description  String? @db.Text
+  imageUrl     String? @db.Text
+  quarterId    String?
+  quarter      Quarter?  @relation(fields: [quarterId], references: [id])
+  isPublished  Boolean @default(false)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  subCategoryId String
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
+
+  classId      String
+  class        Class   @relation(fields: [classId], references: [id])
+
+  weekId String?
+  week   Week?  @relation(fields: [weekId], references: [id])
+
+  sections Section[]
+
+  enrollments Enrollment[]
+
+  tests    Test[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([categoryId])
+  @@index([subCategoryId])
+  @@index([weekId])
+}
+
+model Category {
+  id            String        @id @default(uuid())
+  name          String        @unique
+  subCategories SubCategory[]
+  courses       Course[]
+}
+
+model SubCategory {
+  id            String        @id @default(uuid())
+  name          String
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  courses Course[]
+
+  @@index([categoryId])
+}
+
+model Quarter {
+  id      String   @id @default(uuid())
+  name    String   @unique
+  courses Course[]
+}
+
+model Week {
+  id      String   @id @default(uuid())
+  name    String   @unique
+  courses Course[]
+}
+
+model Section {
+  id          String  @id @default(uuid())
+  title       String
+  description String? @db.Text
+  videoUrl    String? @db.Text
+  imageUrl    String? @db.Text
+  imageDescription String? @db.Text
+  position    Int
+  isPublished Boolean @default(false)
+  isEnrolled  Boolean @default(false)
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  resources Resource[]
+
+  progress Progress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([courseId])
+}
+
+model Resource {
+  id      String @id @default(uuid())
+  name    String
+  fileUrl String
+
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([sectionId])
+}
+
+model Progress {
+  id        String @id @default(uuid())
+  studentId String 
+
+  sectionId String?
+  section   Section? @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  testId    String?
+  test      Test?    @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  isCompleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([sectionId])
+  @@index([testId])
+  @@unique([studentId, sectionId])
+  @@unique([studentId, testId])
+}
+
+model Enrollment {
+  id         String @id @default(uuid())
+  studentId String 
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  enrolledAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([courseId])
+  @@unique([studentId, courseId])
+}
+
+model Class {
+  id           String  @id @default(uuid())
+  instructorId Int
+  instructor   User     @relation(fields: [instructorId], references: [id])
+  name        String  @db.Text
+  description  String? @db.Text
+  section   String? @db.Text
+  code String? @unique
+  imageUrl     String? @db.Text
+  isCreated  Boolean @default(false)
+  courseId     String?
+  courses      Course[]
+
+  joined Joined[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Joined {
+  id         String @id @default(uuid())
+  studentId  Int
+  student    User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  classId String
+  class   Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([classId])
+  @@unique([studentId, classId])
+}
+
+model VerificationToken {
+  id String @id @default(cuid())
+  email String
+  token String @unique
+  expiresAt DateTime
+
+  @@unique([email, token])
+}
