@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Poppins, Roboto } from "next/font/google";
 import "@/app/globals.css";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import ClientDndProvider from "@/components/dnd-provider";
+import { Toaster } from "react-hot-toast";
 
-const inter = Inter({ subsets: ["latin"] });
+const poppins = Poppins({ subsets: ["latin"], weight: ["400", "700"] });
 
 export const metadata: Metadata = {
     title: "GeomeTriks",
@@ -20,7 +21,7 @@ export default function RootLayout({
     return (
         <SessionProvider>
             <html lang="en">
-                <body className={inter.className}>
+                <body className={poppins.className}>
                     <ThemeProvider
                         attribute="class"
                         defaultTheme="system"
@@ -29,6 +30,7 @@ export default function RootLayout({
                     >
                         <ClientDndProvider>
                             <div className="min-h-screen flex flex-col justify-center">
+                                <Toaster/>
                                 <main>{children}</main>
                             </div>
                         </ClientDndProvider>

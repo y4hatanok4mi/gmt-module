@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
         id: true,
         name: true,
         email: true,
+        birthday: true,
         gender: true,
         school: true,
         id_no: true,

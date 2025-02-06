@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import AlertBanner from "@/components/alert-banner";
-import EditCourseForm from "@/components/courses/course-edit";
+import EditCourseForm from "@/components/lessons/course-edit";
 import prisma from "@/lib/prisma";
 import { redirect, useParams } from "next/navigation";
 

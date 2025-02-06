@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,6 @@ interface Question {
 interface QuizData {
   questions: Question[];
   error?: string;
-  // This represents the quiz data
 }
 
 interface QuizResponse {
@@ -36,26 +35,25 @@ interface QuizResponse {
   questions?: Question[]; // Optional questions array if the response is successful
 }
 
-// Define schema for validation
 const quizSchema = z.object({
   questions: z
     .array(
       z.object({
-        question: z.string().min(1, { message: "Question text is required" }),
+        question: z.string().min(1, { message: "Question is required" }),
         options: z
-          .array(z.string().min(1, { message: "Option text is required" }))
+          .array(z.string().min(1, { message: "Option is required" }))
           .min(2, { message: "At least 2 options are required" }),
         correctAnswer: z.string().min(1, { message: "Correct answer is required" }),
         index: z.number(), // Adding index for each question
       })
     )
-    .min(1, { message: "At least one question is required" }),
+    .min(1, { message: "At least one question is required" }), // Require at least one question
 });
 
 type QuizFormValues = z.infer<typeof quizSchema>;
 
 const QuizEditForm = () => {
-  const { exerciseId, courseId } = useParams();
+  const { moduleId, lessonId, exerciseId, } = useParams();
   const form = useForm<QuizFormValues>({
     resolver: zodResolver(quizSchema),
     defaultValues: {
@@ -71,7 +69,7 @@ const QuizEditForm = () => {
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
-        const response = await fetch(`/api/courses/${courseId}/test/${exerciseId}/get`);
+        const response = await fetch(`/api/modules/${moduleId}/lessons/${lessonId}/exercises/${exerciseId}`);
         const data: QuizData = await response.json();
 
         if (response.ok) {
@@ -94,7 +92,7 @@ const QuizEditForm = () => {
     };
 
     fetchQuizData();
-  }, [exerciseId, courseId, form]);
+  }, [exerciseId, moduleId, lessonId, form]);
 
 
   const handleAddQuestion = () => {
@@ -119,39 +117,27 @@ const QuizEditForm = () => {
   };
 
   const onSubmit = async (data: QuizFormValues) => {
-    const { questions } = data;
+  try {
+    const response = await fetch(`/api/modules/${moduleId}/lessons/${lessonId}/exercises/${exerciseId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data.questions), // Send all questions in a single request
+    });
 
-    try {
-      // Loop through the questions and send PUT request for each question update
-      for (const question of questions) {
-        const { question: questionText, options, correctAnswer } = question;
+    const result = await response.json();
 
-        // Prepare the updated data for each question
-        const response = await fetch(`/api/courses/${courseId}/test/${exerciseId}/update`, {
-          method: "PUT", // Use PUT for updating
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            question: questionText,
-            options, // Include updated options
-            correctAnswer, // Include the correct answer
-          }),
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          toast.success(result.message || "Question updated successfully");
-        } else {
-          toast.error(result.error || `Failed to update question with ID:`);
-        }
-      }
-    } catch (error) {
-      console.error("Error submitting quiz:", error);
-      toast.error("An unexpected error occurred");
+    if (response.ok) {
+      toast.success(result.message || "Quiz updated successfully");
+    } else {
+      toast.error(result.error || "Failed to update quiz");
     }
-  };
+  } catch (error) {
+    console.error("Error submitting quiz:", error);
+    toast.error("An unexpected error occurred");
+  }
+};
 
   return (
     <Form {...form}>
@@ -259,9 +245,16 @@ const QuizEditForm = () => {
               Cancel
             </Button>
           </Link>
-          <Button type="submit" size={"sm"} disabled={!form.formState.isValid || form.formState.isSubmitting}>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={
+              !form.formState.isValid || form.formState.isSubmitting || questionFields.length === 0
+            }
+          >
             {form.formState.isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
           </Button>
+
 
           <div className="ml-auto flex items-center">
             <Button size={"sm"} variant="outline" type="button" onClick={handleAddQuestion}>

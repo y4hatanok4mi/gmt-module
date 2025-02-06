@@ -1,15 +1,15 @@
-import { Section } from "@prisma/client";
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd"
 import { useEffect, useState } from "react";
 import { Grip, Pencil } from "lucide-react";
+import { Exercise } from "@prisma/client";
 
-interface SectionListProps {
-  items: Section[];
+interface ExercisesListProps {
+  items: Exercise[];
   onReorder: (updateData: { id: string; position: number }[]) => void;
   onEdit: (id: string) => void;
 }
 
-const SectionList = ({ items, onReorder, onEdit }: SectionListProps) => {
+const ExercisesList = ({ items, onReorder, onEdit }: ExercisesListProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [sections, setSections] = useState(items);
 
@@ -90,4 +90,4 @@ const SectionList = ({ items, onReorder, onEdit }: SectionListProps) => {
   );
 };
 
-export default SectionList;
+export default ExercisesList;

@@ -1,4 +1,4 @@
-import CreateCourseForm from "@/components/courses/create-course";
+import CreateCourseForm from "@/components/lessons/create-course";
 import prisma from "@/lib/prisma";
 
 import { 

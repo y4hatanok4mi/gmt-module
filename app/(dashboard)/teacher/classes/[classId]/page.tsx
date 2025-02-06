@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { columns } from "@/components/courses/columns";
+import { columns } from "@/components/lessons/lessons-columns";
 import { DataTable } from "@/components/data-table";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb";

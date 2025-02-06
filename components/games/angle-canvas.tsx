@@ -12,8 +12,8 @@ const AngleCanvas = ({ angle }: AngleCanvasProps) => {
 
   return (
     <svg
-      width="400"
-      height="400"
+      width="300"
+      height="300"
       viewBox="0 0 300 300"
       className="bg-white border border-gray-300 rounded"
     >

@@ -2,8 +2,7 @@
 
 import * as React from "react"
 import {
-  CaretSortIcon,
-  DotsHorizontalIcon,
+  CaretSortIcon
 } from "@radix-ui/react-icons"
 import {
   ColumnDef,
@@ -22,10 +21,10 @@ import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Table,
   TableBody,
@@ -35,17 +34,19 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { exportUsersToPDF } from "@/components/utils/exportToPDF"
+import { SlidersHorizontal } from "lucide-react"
 
-type Role = "student" | "teacher" | "admin"
+type Role = "student" | "admin"
 
 export type Details = {
-  id: number
-  name: string
-  email: string
-  gender: "Male" | "Female"
-  school: "MNCHS" | "BSNHS" | "SNHS" | "PBNHS" | "BNHS"
-  id_no: string
-  role: Role
+  id: number;
+  name: string;
+  email: string;
+  birthday: Date;
+  gender: "Male" | "Female";
+  school: "MNCHS" | "BSNHS" | "SNHS" | "PBNHS" | "BNHS";
+  id_no: string;
+  role: Role;
 }
 
 interface UserDataTableProps {
@@ -80,6 +81,19 @@ export const columns: ColumnDef<Details>[] = [
     cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
   },
   {
+    accessorKey: "birthday",
+    header: "Birthday",
+    cell: ({ row }) => {
+      const birthday = row.getValue("birthday");
+      const formattedBirthday = new Date(birthday as string).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      return <div>{formattedBirthday}</div>;
+    },
+  },
+  {
     accessorKey: "gender",
     header: "Gender",
     cell: ({ row }) => <div>{row.getValue("gender")}</div>,
@@ -94,88 +108,6 @@ export const columns: ColumnDef<Details>[] = [
     header: "ID No.",
     cell: ({ row }) => <div>{row.getValue("id_no")}</div>,
   },
-  {
-    accessorKey: "role",
-    header: "Role",
-    cell: ({ row }) => <div>{row.getValue("role")}</div>,
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const user = row.original
-
-      const handleEdit = async (user: Details) => {
-        const response = await fetch("/api/user-control", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(user),
-        })
-      
-        const result = await response.json()
-        if (response.ok) {
-          console.log("User updated:", result)
-        } else {
-          console.error("Error updating user:", result.error)
-        }
-      }
-      
-      const handleDelete = async (id: number) => {
-        try {
-          console.log("ID to be deleted:", id)
-      
-          const response = await fetch("/api/user-control", {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ id }),
-          })
-      
-          const result = await response.json()
-          if (!response.ok) {
-            throw new Error(result.error || "Failed to delete user!")
-          }
-      
-          console.log(result.message)
-        } catch (error: unknown) {
-          if (error instanceof Error) {
-            console.error("Error deleting user:", error.message)
-            alert(`Error: ${error.message}`)
-          } else {
-            console.error("An unknown error occurred:", error)
-            alert("An unknown error occurred")
-          }
-        }
-      }
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <DotsHorizontalIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => handleEdit(user)}
-            >
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => handleDelete(user.id)}
-              className="text-red-500"
-            >
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
-  },
 ]
 
 export function UserDataTable({ role }: UserDataTableProps) {
@@ -186,30 +118,66 @@ export function UserDataTable({ role }: UserDataTableProps) {
   const [globalFilter, setGlobalFilter] = React.useState<string>("")
   const [users, setUsers] = React.useState<Details[]>([])
 
+  // Checklist state
+  const [selectedFilters, setSelectedFilters] = React.useState<{ gender: string[], school: string[], role: string[] }>({
+    gender: [],
+    school: [],
+    role: [],
+  });
+
+  // Fetch Users
   React.useEffect(() => {
     const fetchUsers = async () => {
-        console.log(`Fetching users with role: ${role}`);
-        try {
-            const response = await fetch(`/api/getuserbyrole?role=student`);
-          const data = await response.json();
-          console.log("API Response:", data);
-          if (response.ok) {
-            setUsers(data);
-          } else {
-            console.error("Failed to fetch users:", data.error);
-          }
-        } catch (error) {
-          console.error("Error fetching users:", error);
+      try {
+        const response = await fetch(`/api/getuserbyrole?role=${role}`);
+        const data = await response.json();
+        console.log(data)
+        if (response.ok) {
+          setUsers(data);
+        } else {
+          console.error("Failed to fetch users:", data.error);
         }
-      };
-  
-      fetchUsers();
-  }, [role])
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+    fetchUsers();
+  }, [role]);
+
+  // Handle Checkbox Selection
+  const handleFilterChange = (category: "gender" | "school" | "role", value: string) => {
+    setSelectedFilters((prev) => {
+      const updatedCategory = prev[category].includes(value)
+        ? prev[category].filter((item) => item !== value) // Remove if already selected
+        : [...prev[category], value]; // Add if not selected
+
+      return { ...prev, [category]: updatedCategory };
+    });
+  };
+
+  // Apply Filters
+  React.useEffect(() => {
+    let filters: ColumnFiltersState = [];
+
+    if (selectedFilters.gender.length) {
+      filters.push({ id: "gender", value: selectedFilters.gender });
+    }
+    if (selectedFilters.school.length) {
+      filters.push({ id: "school", value: selectedFilters.school });
+    }
+    if (selectedFilters.role.length) {
+      filters.push({ id: "role", value: selectedFilters.role });
+    }
+
+    setColumnFilters(filters);
+  }, [selectedFilters]);
 
   const handleExport = () => {
-    exportUsersToPDF(users)
-  }
+    const filteredData = table.getFilteredRowModel().rows.map((row) => row.original);
+    exportUsersToPDF(filteredData);
+  };
 
+  // Table
   const table = useReactTable({
     data: users,
     columns,
@@ -224,7 +192,7 @@ export function UserDataTable({ role }: UserDataTableProps) {
     globalFilterFn: (row, columnId, filterValue) => {
       return String(row.getValue(columnId))
         .toLowerCase()
-        .includes(filterValue.toLowerCase())
+        .includes(filterValue.toLowerCase());
     },
     state: {
       sorting,
@@ -234,17 +202,57 @@ export function UserDataTable({ role }: UserDataTableProps) {
       globalFilter,
     },
     onGlobalFilterChange: setGlobalFilter,
-  })
+  });
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      {/* Search & Filter */}
+      <div className="flex items-center space-x-2 py-4">
         <Input
           placeholder="Search for users..."
           value={globalFilter}
           onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
+
+        {/* Filter Button */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="gap-2">
+              <SlidersHorizontal className="h-4 w-4" /> Filter
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="flex flex-col gap-2 w-64 p-4">
+            {/* Gender */}
+            <div className="flex flex-row gap-2">
+              <div className="mb-2">
+                <h4 className="text-sm font-medium">Gender</h4>
+                {["Male", "Female"].map((gender) => (
+                  <div key={gender} className="flex items-center space-x-2">
+                    <Checkbox checked={selectedFilters.gender.includes(gender)} onCheckedChange={() => handleFilterChange("gender", gender)} />
+                    <label className="text-sm">{gender}</label>
+                  </div>
+                ))}
+              </div>
+
+              {/* School */}
+              <div className="mb-2">
+                <h4 className="text-sm font-medium">School</h4>
+                {["MNCHS", "BSNHS", "SNHS", "PBNHS", "BNHS"].map((school) => (
+                  <div key={school} className="flex items-center space-x-2">
+                    <Checkbox checked={selectedFilters.school.includes(school)} onCheckedChange={() => handleFilterChange("school", school)} />
+                    <label className="text-sm">{school}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Reset Filters */}
+            <Button variant="destructive" onClick={() => setSelectedFilters({ gender: [], school: [], role: [] })} className="w-full mt-2">
+              Reset Filters
+            </Button>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -257,9 +265,9 @@ export function UserDataTable({ role }: UserDataTableProps) {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   )
                 })}
@@ -294,7 +302,7 @@ export function UserDataTable({ role }: UserDataTableProps) {
         </Table>
       </div>
       <div className="flex justify-end pt-2">
-        <Button onClick={handleExport} className="px-6">
+        <Button onClick={handleExport} className="px-6 border">
           Export to PDF
         </Button>
       </div>

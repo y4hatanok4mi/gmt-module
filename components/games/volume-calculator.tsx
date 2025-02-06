@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react";
-import { ShapeVisualization } from "./cube-visual";
+import { ShapeVisualization } from "./shape-visual";
 
 const VolumeCalculator = () => {
   const [shape, setShape] = useState<string>("cube");
@@ -61,7 +61,7 @@ const VolumeCalculator = () => {
             className="w-full"
           />
           <p>Side: {side} units</p>
-          <p>Volume: {volumeCube.toFixed(2)} cubic units</p>
+          <p>Formula: Volume = Side³ = {side}³ = <b>{volumeCube.toFixed(2)} cubic units</b></p>
         </div>
       )}
 
@@ -89,7 +89,7 @@ const VolumeCalculator = () => {
             className="w-full"
           />
           <p>Height: {height} units</p>
-          <p>Volume: {volumeCylinder.toFixed(2)} cubic units</p>
+          <p>Formula: Volume = π × Radius² × Height = 3.14 × {radius}² × {height} = <b>{volumeCylinder.toFixed(2)} cubic units</b></p>
         </div>
       )}
 
@@ -117,7 +117,7 @@ const VolumeCalculator = () => {
             className="w-full"
           />
           <p>Height: {height} units</p>
-          <p>Volume: {volumeCone.toFixed(2)} cubic units</p>
+          <p>Formula: Volume = (π × Radius² × Height) / 3 = (3.14 × {radius}² × {height}) / 3 = <b>{volumeCone.toFixed(2)} cubic units</b></p>
         </div>
       )}
     </div>

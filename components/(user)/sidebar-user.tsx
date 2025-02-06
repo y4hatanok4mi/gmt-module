@@ -1,13 +1,12 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import axios from "axios"
 import {
   BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Settings,
-  Sparkles,
+  Settings
 } from "lucide-react"
 
 import {
@@ -32,19 +31,29 @@ import {
 } from "@/components/ui/sidebar"
 import { handleSignOut } from "@/app/actions/authActions"
 import Link from "next/link"
-import { useSession } from "next-auth/react"
 
 export function NavUser() {
-  const { data: session } = useSession();
   const { isMobile } = useSidebar()
+  const [userData, setUserData] = useState<{ name: string; email: string; avatar: string } | null>(null)
 
-  const data = {
-    user: {
-      name: session?.user?.name as string,
-      email: session?.user?.email as string,
-      avatar: session?.user?.image as string,
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get("/api/get-current-user")
+        setUserData({
+          name: response.data.name,
+          email: response.data.email,
+          avatar: response.data.image || "/user.png",
+        })
+      } catch (error) {
+        console.error("Error fetching user:", error)
+      }
     }
-  }
+
+    fetchUser()
+  }, [])
+
+  if (!userData) return null
 
   return (
     <SidebarMenu>
@@ -56,12 +65,12 @@ export function NavUser() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={data.user.avatar} alt={data.user.name} />
+                <AvatarImage src={userData.avatar} alt={userData.name} />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{data.user.name}</span>
-                <span className="truncate text-xs">{data.user.email}</span>
+                <span className="truncate font-semibold">{userData.name}</span>
+                <span className="truncate text-xs">{userData.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -75,42 +84,37 @@ export function NavUser() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={data.user.avatar} alt={data.user.name} />
+                  <AvatarImage src={userData.avatar} alt={userData.name} />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{data.user.name}</span>
-                  <span className="truncate text-xs">{data.user.email}</span>
+                  <span className="truncate font-semibold">{userData.name}</span>
+                  <span className="truncate text-xs">{userData.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <Link href={"/profile"} className="flex flex-row gap-2">
+                <Link href={"/admin/profile"} className="flex flex-row gap-2">
                   <BadgeCheck />
-                  Account
+                  Profile
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
-              <Link href={"/settings"} className="flex flex-row gap-2">
-                <Settings />
-                Settings
-              </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
+                <Link href={"/admin/settings"} className="flex flex-row gap-2">
+                  <Settings />
+                  Settings
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-            <form action={handleSignOut}>
-              <button type="submit" className="flex flex-row gap-2">
+              <form action={handleSignOut}>
+                <button type="submit" className="flex flex-row gap-2">
                   <LogOut /> Sign Out
-              </button>
-            </form>
+                </button>
+              </form>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

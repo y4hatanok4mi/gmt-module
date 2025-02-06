@@ -1,3 +1,5 @@
+"use client"
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,30 +12,29 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Loader2, Trash } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 
-interface DeleteProps {
+interface ModuleDeleteProps {
   item: string;
-  courseId: string;
-  sectionId?: string;
+  lessonId: string;
+  moduleId: string;
 }
 
-const Delete = ({ item, courseId, sectionId }: DeleteProps) => {
+const ModuleDelete = ({ item, lessonId, moduleId }: ModuleDeleteProps) => {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
-  const { classId } = useParams();
 
   const onDelete = async () => {
     try {
       setIsDeleting(true);
 
       const url =
-        item === "course"
-          ? `/api/courses/${courseId}`
-          : `/api/courses/${courseId}/sections/${sectionId}`;
+        item === "module"
+          ? `/api/modules/${moduleId}`
+          : `/api/modules/${moduleId}/lessons/${lessonId}`;
 
       const response = await fetch(url, {
         method: 'DELETE',
@@ -44,9 +45,9 @@ const Delete = ({ item, courseId, sectionId }: DeleteProps) => {
       }
 
       const pushedUrl =
-        item === "course"
-          ? `/teacher/classes/${classId}/courses`
-          : `/teacher/classes/${classId}/courses/${courseId}/sections`;
+        item === "module"
+          ? `/admin/data-management/modules`
+          : `/admin/data-management/modules/${moduleId}`;
 
       router.push(pushedUrl);
       router.refresh();
@@ -94,4 +95,4 @@ const Delete = ({ item, courseId, sectionId }: DeleteProps) => {
   );
 };
 
-export default Delete;
+export default ModuleDelete;

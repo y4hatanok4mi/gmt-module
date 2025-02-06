@@ -50,13 +50,13 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           },
           {
             title: "Data Management",
-            url: "/admin/data-management/courses",
+            url: "/admin/data-management/modules",
             icon: FolderKanban,
             isActive: true,
             items: [
               {
-                title: "Lessons",
-                url: "/admin/data-management/courses",
+                title: "Modules",
+                url: "/admin/data-management/modules",
               },
               {
                 title: "Users",
@@ -66,28 +66,19 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
           },
           {
             title: "Reports",
-            url: "/admin/reports",
+            url: "/admin/reports/modules-report",
             icon: BookOpen,
             isActive: true,
             items: [
               {
-                title: "Lessons Report",
-                url: "/admin/reports/lessons-report",
+                title: "Modules Report",
+                url: "/admin/reports/modules-report",
               },
               {
                 title: "Students Report",
                 url: "/admin/reports/students-report",
               },
-              {
-                title: "Teachers Report",
-                url: "/admin/reports/teachers-report",
-              },
             ],
-          },
-          {
-            title: "Settings",
-            url: "/admin/settings",
-            icon: Settings2
           },
         ],
       }

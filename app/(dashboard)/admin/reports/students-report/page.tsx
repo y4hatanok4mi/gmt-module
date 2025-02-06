@@ -24,11 +24,11 @@ const StudentManagementPage = () => {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/admin/data-management">Data Management</BreadcrumbLink>
+                  <BreadcrumbLink href="/admin/reports/modules-report">Reports</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Users Management</BreadcrumbPage>
+                  <BreadcrumbPage>Students Report</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

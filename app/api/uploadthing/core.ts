@@ -13,16 +13,25 @@ const handleAuth = async () => {
 };
 
 export const ourFileRouter = {
-  courseBanner: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+  questionImage: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
   .middleware(handleAuth)
   .onUploadComplete(() => {}),
-  classImage: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+  profilePicture: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
   .middleware(handleAuth)
   .onUploadComplete(() => {}),
-  sectionVideo: f({ video: { maxFileSize: "512GB", maxFileCount: 1 } })
+  lessonBanner: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
   .middleware(handleAuth)
   .onUploadComplete(() => {}),
-  sectionResource: f(["text", "image", "video", "audio", "pdf"])
+  moduleImage: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+  .middleware(handleAuth)
+  .onUploadComplete(() => {}),
+  chapterImage: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+  .middleware(handleAuth)
+  .onUploadComplete(() => {}),
+  chapterVideo: f({ video: { maxFileSize: "512GB", maxFileCount: 1 } })
+  .middleware(handleAuth)
+  .onUploadComplete(() => {}),
+  lessonResource: f(["text", "image", "video", "audio", "pdf"])
   .middleware(handleAuth)
   .onUploadComplete(() => {}),
 } satisfies FileRouter;

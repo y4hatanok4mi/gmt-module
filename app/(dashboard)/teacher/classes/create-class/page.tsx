@@ -1,4 +1,4 @@
-import CreateCourseForm from "@/components/courses/create-course"
+import CreateCourseForm from "@/components/lessons/create-course"
 import prisma from "@/lib/prisma"
 
 import { 
@@ -14,7 +14,7 @@ import {
     BreadcrumbSeparator,
   } from "@/components/ui/breadcrumb";
   import { Separator } from '@radix-ui/react-separator';
-import CreateClassForm from "@/components/classes/create-class";
+import CreateClassForm from "@/components/modules/create-module";
 
 const CreateCoursePage = async () => {
 

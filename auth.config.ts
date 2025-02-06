@@ -42,6 +42,8 @@ export default {
           gender: user.gender,
           school: user.school,
           id_no: user.id_no,
+          points: user.points,
+          image: user.image
         };
       },
     }),
@@ -55,6 +57,8 @@ export default {
         token.school = user.school;
         token.id_no = user.id_no;
         token.birthday = user.birthday as string;
+        token.points = user.points;
+        token.image = user.image;
       }
 
       // This can be used to persist session changes across updates
@@ -70,6 +74,8 @@ export default {
       session.user.school = token.school;
       session.user.id_no = token.id_no;
       session.user.birthday = token.birthday;
+      session.user.points = token.points;
+      session.user.image = token.image as string;
 
       return session;
     },

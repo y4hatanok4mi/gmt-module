@@ -5,6 +5,10 @@ export default auth(async (req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
+  if (nextUrl.pathname.startsWith("/api/verify-email")) {
+    return;
+  }
+
   if (nextUrl.pathname.startsWith("/api/uploadthing")) {
     return;
   }

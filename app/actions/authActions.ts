@@ -7,31 +7,69 @@ import { AuthError } from "next-auth";
 import bcryptjs from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { userGender, userRole, userSchool } from "@prisma/client";
-import { generateVerificationToken } from "@/lib/tokens";
+import { sendVerificationEmail } from "@/mail/email";
 
-export async function handleCredentialsSignin({ id_no, password }: {
-    id_no: string,
-    password: string
-}) {
+interface SignInResponse {
+    ok: boolean;
+    error?: string;
+}
 
+export async function handleCredentialsSignin({ id_no, password }: { id_no: string; password: string }) {
     try {
-        await signIn("credentials", { id_no, password });
+        // Check if user exists with the provided ID number
+        const user = await prisma.user.findUnique({
+            where: { id_no },
+        });
+
+        if (!user) {
+            return {
+                error: "User not found!",
+            };
+        }
+
+        // Check if the user has verified their email
+        if (!user.isEmailVerified) {
+            return {
+                error: "Account not verified! Please check your email for the verification link.",
+            };
+        }
+
+        // If the user is verified, proceed with password validation
+        const isPasswordCorrect = await bcryptjs.compare(password, user.password);
+
+        if (!isPasswordCorrect) {
+            return {
+                error: "Invalid credentials!",
+            };
+        }
+
+        // Successful sign-in
+        const signInResult: SignInResponse = await signIn("credentials", { id_no, password });
+
+        if (!signInResult.ok) {
+            return {
+                error: "Something went wrong during sign-in!",
+            };
+        }
+
+        return { success: true, message: "Successfully signed in!" };
     } catch (error) {
         if (error instanceof AuthError) {
             switch (error.type) {
-                case 'CredentialsSignin':
+                case "CredentialsSignin":
                     return {
-                        error: 'Invalid credentials!',
-                    }
+                        error: "Invalid credentials!",
+                    };
                 default:
                     return {
-                        error: 'Something went wrong!',
-                    }
+                        error: "Something went wrong!",
+                    };
             }
         }
+        console.error("Error during sign-in:", error);
         throw error;
     }
-};
+}
 
 export async function handleSignOut() {
     await signOut({
@@ -40,30 +78,50 @@ export async function handleSignOut() {
       });
 }
 
-
-export async function handleSignUp({ email, password, confirmPassword, fname, lname, bday, gender, school, role, id_no }: {
-    fname: string,
-    lname: string,
-    email: string,
-    password: string,
-    confirmPassword: string,
-    bday: Date,
-    gender: userGender,
-    school: userSchool,
-    role: userRole,
-    id_no: string
+export async function handleSignUp({
+    email,
+    password,
+    confirmPassword,
+    fname,
+    lname,
+    bday,
+    gender,
+    school,
+    role,
+    id_no
+}: {
+    fname: string;
+    lname: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    bday: Date;
+    gender: userGender;
+    school: userSchool;
+    role: userRole;
+    id_no: string;
 }) {
     try {
-        const parsedCredentials = signUpSchema.safeParse({ email, password, confirmPassword, fname, lname, bday, gender, school, role, id_no });
+        const parsedCredentials = signUpSchema.safeParse({
+            email,
+            password,
+            confirmPassword,
+            fname,
+            lname,
+            bday,
+            gender,
+            school,
+            role,
+            id_no
+        });
+        
         if (!parsedCredentials.success) {
             console.log("Validation failed:", parsedCredentials.error);
             return { success: false, message: "Invalid data!" };
         }
 
         const existingUserByEmail = await prisma.user.findUnique({
-            where: {
-                email
-            },
+            where: { email }
         });
 
         if (existingUserByEmail) {
@@ -71,9 +129,7 @@ export async function handleSignUp({ email, password, confirmPassword, fname, ln
         }
 
         const existingUserByIDNo = await prisma.user.findUnique({
-            where: {
-                id_no
-            },
+            where: { id_no }
         });
 
         if (existingUserByIDNo) {
@@ -81,7 +137,9 @@ export async function handleSignUp({ email, password, confirmPassword, fname, ln
         }
 
         const hashedPassword = await bcryptjs.hash(password, 10);
-        await prisma.user.create({
+        
+        // Create the user in the database
+        const newUser = await prisma.user.create({
             data: {
                 name: `${fname} ${lname}`,
                 email,
@@ -91,10 +149,27 @@ export async function handleSignUp({ email, password, confirmPassword, fname, ln
                 school,
                 role,
                 id_no
-            },
+            }
         });
 
-        const  verificationToken = await generateVerificationToken(email);
+        // Generate a verification token
+        const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Set token expiration (e.g., 1 hour from creation)
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + 1); // 1 hour expiration
+
+        // Store the token and its expiration in the database
+        await prisma.verificationToken.create({
+            data: {
+                email, // Use email as reference for User relation
+                token: verificationToken,
+                expiresAt // Store expiration time
+            }
+        });
+
+        // Send the verification email with the token
+        await sendVerificationEmail(email, verificationToken);
 
         return { success: true, message: "Confirmation email sent!" };
     } catch (error) {
@@ -102,3 +177,4 @@ export async function handleSignUp({ email, password, confirmPassword, fname, ln
         return { success: false, message: "An unexpected error occurred! Please try again." };
     }
 }
+

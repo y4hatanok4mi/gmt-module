@@ -1,5 +1,5 @@
 import { auth } from "@/auth"
-import CourseCard from "@/components/courses/course-card";
+import CourseCard from "@/components/modules/module-card";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { JoinClassDialog } from "@/components/classes/join-class";
-import ClassCard from "@/components/classes/class-card-student";
+import { JoinClassDialog } from "@/components/modules/join-module";
+import ClassCard from "@/components/modules/module-card-student";
 
 const LearningPage = async () => {
   const user = await auth();

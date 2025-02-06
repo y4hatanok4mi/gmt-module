@@ -1,6 +1,6 @@
 import getCoursesByCategory from "@/app/actions/getCourses";
 import Categories from "@/components/categories";
-import CourseCard from "@/components/courses/course-card";
+import CourseCard from "@/components/modules/module-card";
 import Topbar from "@/components/layout/topbar";
 import { ModeToggle } from "@/components/mode-toggle";
 import {

@@ -23,7 +23,7 @@ import { auth } from "@/auth";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { BadgeInfo } from "lucide-react";
-import { columns } from "@/components/courses/columns";
+import { columns } from "@/components/lessons/lessons-columns";
 
 const Courses = async ({ params }: { params: { classId: string } }) => {
 

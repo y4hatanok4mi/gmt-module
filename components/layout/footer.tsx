@@ -1,13 +1,9 @@
 "use client"
-import { FC, useState, useEffect, useRef } from 'react';
-import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
-const Footer: FC = () => {
-   
-
+const Footer= () => {
     return (
-        <footer className="mt-auto text-black text-center p-4">
+        <footer className="mt-auto text-black text-center p-4 bg-white">
             <p className="text-sm">© 2024 <Link href="/student" className="hover:text-gray-400">
                 Geome<span className='text-green-500'>Triks</span>
             </Link>. All Rights Reserved.</p>

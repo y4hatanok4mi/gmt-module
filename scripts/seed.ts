@@ -4,76 +4,72 @@ const database = new PrismaClient();
 async function main() {
   try {
 
-    const categories = [
+    const municipalities = [
       {
-        name: "Polygons",
-        subCategories: {
+        name: "Mogpog",
+        schools: {
           create: [
-            { name: "Types of Polygons" },
-            { name: "Definition and Properties" },
-            { name: "Regular and Irregular Polygons" },
-            { name: "Convex and Non-Convex Polygons" },
+            { name: 'Sayao National High School' },
+            { name: 'Balanacan National High School' },
+            { name: 'Mogpog National Comprehensive High School' },
+            { name: 'Butansapa National High School' },
+            { name: 'Puting Buhangin National High School' },
           ],
         },
       },
       {
-        name: "Angles",
-        subCategories: {
+        name: "Boac",
+        schools: {
           create: [
-            { name: "Angle Pairs" },
-            { name: "Exterior and Interior Angles" },
-            { name: "Adjacent Angles" },
-            { name: "Angle Measurements" },
+            { name: "Marinduque National High School" },
           ],
         },
       },
       {
-        name: "Area and Volume",
-        subCategories: {
+        name: "Gasan",
+        schools: {
           create: [
-            { name: "Area of Shapes and Polygons" },
-            { name: "Volume of Cylinders" },
-            { name: "Volume of Rectangular Prism" },
-            { name: "Volume of Square and Rectangular Pyramid" },
-            { name: "Volume of Composite Solid" },
+            { name: "Tiguion National High School" },
+          ],
+        },
+      },
+      {
+        name: "Buenavista",
+        schools: {
+          create: [
+            { name: "Buenavista National High School" },
+          ],
+        },
+      },
+      {
+        name: "Torrijos",
+        schools: {
+          create: [
+            { name: "Landy National High School" },
+          ],
+        },
+      },
+      {
+        name: "Sta. Cruz",
+        schools: {
+          create: [
+            { name: "Alobo National High School" },
           ],
         },
       },
     ];
 
-    for (const category of categories) {
-      await database.category.create({
+    for (const municipality of municipalities) {
+      await database.municipality.create({
         data: {
-          name: category.name,
-          subCategories: category.subCategories,
+          name: municipality.name,
+          schools: municipality.schools,
         },
         include: {
-          subCategories: true,
+          schools: true,
         },
       });
     }
-
-    await database.week.createMany({
-      data: [
-        { name: "Week 1" },
-        { name: "Week 2" },
-        { name: "Week 3" },
-        { name: "Week 4" },
-        { name: "Week 5" },
-        { name: "Week 6" },
-        { name: "Week 7" },
-        { name: "Week 8" },
-      ],
-    });
-
-    await database.quarter.createMany({
-      data: [
-        { name: "Quarter 1" },
-        { name: "Quarter 2" },
-        { name: "Quarter 3" },
-        { name: "Quarter 4" },
-      ],
-    });
 
     console.log("Seeding successfully!");
   } catch (error) {

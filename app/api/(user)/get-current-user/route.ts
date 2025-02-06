@@ -1,41 +1,30 @@
-import { auth } from "@/auth"
-import prisma from "@/lib/prisma"
-import { NextApiRequest, NextApiResponse } from "next"
+import { auth } from "@/auth";
+import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "GET") {
-    try {
-      const user = await auth();
+export async function GET(request: Request) {
+  try {
 
-      if (!user || !user.user || !user.user.id) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
-      const currentUser = await prisma.user.findUnique({
-        where: {
-          id: Number(user.user.id),
-        },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          gender: true,
-          school: true,
-          id_no: true,
-          role: true,
-        },
-      });
-
-      if (!currentUser) {
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      res.status(200).json(currentUser);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ error: "Failed to fetch user" });
+    const user = await auth();
+    const userId = user?.user.id;
+    
+    if (!userId) {
+      return NextResponse.json({ error: "User not found" }, { status: 401 });
     }
-  } else {
-    res.status(405).json({ error: "Method Not Allowed!" });
+
+    const userDetails = await prisma.user.findUnique({
+      where: { 
+        id: Number(userId) 
+      }
+    });
+
+    if (!userDetails) {
+      return NextResponse.json({ error: "User not found in the database" }, { status: 404 });
+    }
+
+    return NextResponse.json(userDetails, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return NextResponse.json({ error: "An error occurred while fetching user data" }, { status: 500 });
   }
 }

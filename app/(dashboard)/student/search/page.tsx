@@ -1,4 +1,4 @@
-import CourseCard from "@/components/courses/course-card";
+import CourseCard from "@/components/modules/module-card";
 import prisma from "@/lib/prisma";
 
 const SearchPage = async ({ searchParams }: { searchParams: { query: string }}) => {

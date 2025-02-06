@@ -2,24 +2,28 @@
 
 import Footer from "@/components/layout/footer";
 import TopBar from "@/components/layout/topbar";
-
+import { usePathname } from "next/navigation";
 
 export default function StudentLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <div className="flex min-h-screen w-full flex-col">
-      {/* TopBar */}
-      <TopBar />
+  const pathname = usePathname();
 
-      {/* Main Content */}
+  const isLessonPage = pathname?.includes(`/student/modules/${pathname.split('/')[3]}/lessons/${pathname.split('/')[5]}`);
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      {/* TopBar only on non-lesson pages */}
+      {!isLessonPage && <TopBar />}
+
       <main className="flex-grow w-full bg-gray-100">
         {children}
       </main>
 
-      <Footer />      
+      {/* Footer only on non-lesson pages */}
+      {!isLessonPage && <Footer />}
     </div>
   );
 }

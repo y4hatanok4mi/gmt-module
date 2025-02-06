@@ -35,7 +35,7 @@ export const signUpSchema = z
     school: z.enum(['SNHS', 'BNHS', 'MNCHS', 'BSNHS', 'PBNHS'], {
       errorMap: () => ({ message: 'Please select your school.' }),
     }),
-    role: z.enum(['student', 'teacher'], {
+    role: z.enum(['student'], {
       errorMap: () => ({ message: 'Please select your role.' }),
     }),
     id_no: z.string(),

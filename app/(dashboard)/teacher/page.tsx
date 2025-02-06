@@ -7,7 +7,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 
-import ClassCard from "@/components/classes/class-card-teacher";
+import ClassCard from "@/components/modules/module-card-teacher";
 
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
@@ -23,21 +23,6 @@ const ClassesPage = async () => {
   if (role !== "teacher") {
     return redirect("/auth/signin");
   }
-
-  const classes = await prisma.class.findMany({
-    where: {
-      instructorId: Number(instructorId),
-    },
-    include: {
-      instructor: true,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-  
-
-  console.log(classes)
 
   return (
     <div>
@@ -66,12 +51,6 @@ const ClassesPage = async () => {
           </Link>
         </div>
 
-        {/* Display Classes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 mt-5">
-          {classes.map((classData) => (
-            <ClassCard key={classData.id} classData={classData} />
-          ))}
-        </div>
       </SidebarInset>
     </div>
   );
